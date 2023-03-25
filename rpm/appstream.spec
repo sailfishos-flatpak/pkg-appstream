@@ -1,19 +1,19 @@
 # Enable Qt by default
-%bcond qt 1
+%global qt_support 1
 
 # Vala/Vapi support ( upstream disabled by default, probably explains why it the build breaks often )
-%global vala 1
+%global vala 0
 
 Summary: Utilities to generate, maintain and access the AppStream database
 Name:    appstream
-Version: 0.16.1
+Version: 0.14.6
 Release: 1%{?dist}
 
 # lib LGPLv2+, tools GPLv2+
 License: GPLv2+ and LGPLv2+
 #URL:     http://www.freedesktop.org/wiki/Distributions/AppStream
 URL:     https://github.com/ximion/appstream
-Source0: http://www.freedesktop.org/software/appstream/releases/AppStream-%{version}.tar.xz
+Source0: %{name}-%{version}.tar.bz2
 
 ## upstream patches (lookaside cache)
 
@@ -21,13 +21,13 @@ Source0: http://www.freedesktop.org/software/appstream/releases/AppStream-%{vers
 
 # needed for cmake auto-provides
 BuildRequires: cmake
-BuildRequires: meson >= 0.62
+BuildRequires: meson >= 0.61
 BuildRequires: gettext
 BuildRequires: gperf
-BuildRequires: gtk-doc
+#BuildRequires: gtk-doc
 BuildRequires: intltool
-BuildRequires: itstool
-BuildRequires: libstemmer-devel
+#BuildRequires: itstool
+#BuildRequires: libstemmer-devel
 BuildRequires: pkgconfig(cairo)
 BuildRequires: pkgconfig(freetype2)
 BuildRequires: pkgconfig(fontconfig)
@@ -39,22 +39,22 @@ BuildRequires: pkgconfig(libsoup-2.4)
 BuildRequires: pkgconfig(librsvg-2.0)
 BuildRequires: pkgconfig(libsystemd)
 BuildRequires: pkgconfig(libxml-2.0)
-BuildRequires: pkgconfig(lmdb)
+#BuildRequires: pkgconfig(lmdb)
 BuildRequires: pkgconfig(packagekit-glib2)
 BuildRequires: pkgconfig(pango)
 BuildRequires: pkgconfig(protobuf-lite)
-%if %{with qt}
+%if %{qt_support}
 BuildRequires: pkgconfig(Qt5Core)
 %endif
-BuildRequires: pkgconfig(xmlb)
+#BuildRequires: pkgconfig(xmlb)
 BuildRequires: pkgconfig(yaml-0.1)
 # lrelease
-%if %{with qt}
-BuildRequires: qt5-linguist
+%if %{qt_support}
+BuildRequires: qt5-qttools-linguist
 %endif
 BuildRequires: sed
 BuildRequires: vala
-BuildRequires: xmlto
+#BuildRequires: xmlto
 
 Requires: appstream-data
 
@@ -84,7 +84,7 @@ Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 %description compose-devel
 %{summary}.
 
-%if %{with qt}
+%if %{qt_support}
 %package qt
 Summary: Qt5 bindings for %{name}
 Requires: %{name}%{?_isa} = %{version}-%{release}
@@ -101,13 +101,13 @@ Requires: pkgconfig(Qt5Core)
 
 
 %prep
-%autosetup -n AppStream-%{version} -p1
+%autosetup -n %{name}-%{version}/upstream -p1
 
 
 %build
 %{meson} \
  -Dcompose=true \
-%if %{with qt}
+%if %{qt_support}
  -Dqt=true \
 %endif
  -Dvapi=%{?vala:true}%{!?vala:false}
@@ -135,7 +135,8 @@ mv %{buildroot}%{_datadir}/metainfo/*.xml \
 %{meson_test} ||:
 
 
-%ldconfig_scriptlets
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
 
 %posttrans
 %{_bindir}/appstreamcli refresh --force >& /dev/null ||:
@@ -203,8 +204,9 @@ mv %{buildroot}%{_datadir}/metainfo/*.xml \
 %dir %{_datadir}/gtk-doc/html/
 %{_datadir}/gtk-doc/html/appstream-compose
 
-%if %{with qt}
-%ldconfig_scriptlets qt
+%if %{qt_support}
+%post -p /sbin/ldconfig qt
+%postun -p /sbin/ldconfig qt
 
 %files qt
 %{_libdir}/libAppStreamQt.so.2*
