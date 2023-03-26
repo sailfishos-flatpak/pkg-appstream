@@ -150,8 +150,7 @@ touch %{buildroot}/var/cache/app-info/cache.watch
 %config(noreplace) %{_sysconfdir}/appstream.conf
 %dir %{_libdir}/girepository-1.0/
 %{_libdir}/girepository-1.0/AppStream-1.0.typelib
-%{_libdir}/libappstream.so.4*
-%{_libdir}/libappstream.so.%{version}
+%{_libdir}/libappstream.so.*
 %{_datadir}/metainfo/org.freedesktop.appstream.cli.*.xml
 # put in -devel? -- rex
 %{_datadir}/gettext/its/metainfo.*
