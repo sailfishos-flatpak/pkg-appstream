@@ -196,8 +196,7 @@ touch %{buildroot}/var/cache/app-info/cache.watch
 %postun -p /sbin/ldconfig qt
 
 %files qt
-%{_libdir}/libAppStreamQt.so.2*
-%{_libdir}/libAppStreamQt.so.%{version}
+%{_libdir}/libAppStreamQt.so.*
 
 %files qt-devel
 %{_includedir}/AppStreamQt/
